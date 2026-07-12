@@ -1,0 +1,39 @@
+<div class="hl-kanban-col">
+    <div class="hl-kanban-col-header">
+        <span><span class="hl-dot hl-dot-{{ column_status }}"></span> {{ column_title }}</span>
+        <span class="hl-kanban-count">{{ column_applications|length }}</span>
+    </div>
+    <div class="hl-kanban-cards">
+        {% if column_applications %}
+            {% for application in column_applications %}
+                <div class="hl-candidate-card" data-candidate-card data-status="{{ application.status }}">
+                    <div class="hl-candidate-name">{{ application.candidate.full_name }}</div>
+                    <div class="hl-candidate-meta">{{ application.candidate.email }}</div>
+                    <div class="hl-candidate-meta mt-1"><i class="bi bi-briefcase"></i> {{ application.job.title }}</div>
+                    <div class="mt-1">
+                        {% for skill_item in application.candidate.skills_list|slice:":3" %}
+                            <span class="hl-skill-chip">{{ skill_item }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="hl-candidate-meta mt-1"><i class="bi bi-calendar-event"></i> {{ application.applied_at|date:"M j, Y" }}</div>
+                    {% if application.resume %}
+                        <div class="mt-1"><a href="{{ application.resume.url }}" target="_blank" rel="noopener" class="small"><i class="bi bi-file-earmark-text"></i> Resume</a></div>
+                    {% endif %}
+                    <select class="form-select form-select-sm mt-2"
+                            data-status-select
+                            data-application-id="{{ application.pk }}"
+                            data-current-status="{{ application.status }}">
+                        <option value="APPLIED" {% if application.status == "APPLIED" %}selected{% endif %}>Application Received</option>
+                        <option value="REVIEW" {% if application.status == "REVIEW" %}selected{% endif %}>Under HR Review</option>
+                        <option value="SHORTLIST" {% if application.status == "SHORTLIST" %}selected{% endif %}>Shortlisted for Interview</option>
+                        <option value="REJECTED" {% if application.status == "REJECTED" %}selected{% endif %}>Not Selected</option>
+                    </select>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center text-muted small py-4">
+                <i class="bi bi-inbox"></i><br>No candidates here
+            </div>
+        {% endif %}
+    </div>
+</div>

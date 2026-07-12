@@ -1,0 +1,44 @@
+{% extends "jobs/base.html" %}
+{% load static %}
+
+{% block title %}ATS Pipeline &mdash; HireLine{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-3 px-lg-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+        <div>
+            <h1 class="h3 mb-0">ATS Pipeline</h1>
+            <p class="text-muted mb-0">Drag status forward as candidates move through hiring stages.</p>
+        </div>
+        <a href="{% url 'recruiter_dashboard' %}" class="btn hl-btn-outline"><i class="bi bi-speedometer2"></i> Back to Dashboard</a>
+    </div>
+
+    <form method="get" class="hl-panel mb-4 row g-2 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label small text-uppercase fw-semibold">Filter by job posting</label>
+            <select name="job" class="form-select">
+                <option value="">All jobs</option>
+                {% for j in jobs %}
+                    <option value="{{ j.pk }}" {% if selected_job == j.pk|stringformat:"s" %}selected{% endif %}>{{ j.title }} &mdash; {{ j.company.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2 d-grid">
+            <button type="submit" class="btn hl-btn-primary"><i class="bi bi-funnel"></i> Filter</button>
+        </div>
+    </form>
+
+    <div class="hl-kanban">
+        {% include "jobs/_kanban_column.html" with column_title="Applied" column_status="APPLIED" column_applications=applied %}
+        {% include "jobs/_kanban_column.html" with column_title="Under Review" column_status="REVIEW" column_applications=review %}
+        {% include "jobs/_kanban_column.html" with column_title="Shortlisted" column_status="SHORTLIST" column_applications=shortlist %}
+        {% include "jobs/_kanban_column.html" with column_title="Rejected" column_status="REJECTED" column_applications=rejected %}
+    </div>
+</div>
+
+<form id="csrfHolder" class="d-none">{% csrf_token %}</form>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'jobs/js/recruiter_dashboard.js' %}"></script>
+{% endblock %}

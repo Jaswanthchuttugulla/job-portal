@@ -1,0 +1,95 @@
+{% extends "jobs/base.html" %}
+{% load static %}
+
+{% block title %}{{ job.title }} at {{ job.company.name }} &mdash; HireLine{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <a href="{% url 'job_list' %}" class="d-inline-flex align-items-center gap-1 mb-3 text-decoration-none">
+        <i class="bi bi-arrow-left"></i> Back to Jobs
+    </a>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="hl-detail-panel">
+                <div class="d-flex align-items-start gap-3 mb-3">
+                    {% if job.company.logo_url %}
+                        <img src="{{ job.company.logo_url }}" alt="{{ job.company.name }} logo" class="hl-job-logo" style="width:64px;height:64px;">
+                    {% else %}
+                        <div class="hl-job-logo-fallback" style="width:64px;height:64px;font-size:1.4rem;">{{ job.company.name|slice:":1" }}</div>
+                    {% endif %}
+                    <div>
+                        <h1 class="h3 mb-1">{{ job.title }}</h1>
+                        <div class="text-muted">{{ job.company.name }} &middot; {{ job.location }}</div>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    <span class="hl-badge-type hl-badge-{{ job.job_type }}">{{ job.get_job_type_display }}</span>
+                    {% if job.job_type == "REMOTE" %}
+                        <span class="hl-remote-badge"><i class="bi bi-house-door"></i> Remote</span>
+                    {% else %}
+                        <span class="hl-onsite-badge"><i class="bi bi-geo-alt"></i> On-site</span>
+                    {% endif %}
+                    {% if job.salary_range %}
+                        <span class="hl-skill-chip"><i class="bi bi-cash-stack"></i> {{ job.salary_range }}</span>
+                    {% endif %}
+                </div>
+
+                <h5 class="mt-4">Job Description</h5>
+                <p style="white-space: pre-line;">{{ job.description }}</p>
+
+                <h5 class="mt-4">Required Skills</h5>
+                <div class="mb-3">
+                    {% for skill_item in job.skills_list %}
+                        <span class="hl-skill-chip">{{ skill_item }}</span>
+                    {% endfor %}
+                </div>
+
+                <div class="row g-3 mt-2">
+                    <div class="col-sm-6">
+                        <div class="hl-job-meta"><i class="bi bi-calendar-event"></i> Posted {{ job.posted_date|date:"M j, Y" }}</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="hl-job-meta"><i class="bi bi-hourglass-split"></i> Apply by {{ job.application_deadline|date:"M j, Y" }}</div>
+                    </div>
+                </div>
+
+                <button type="button" class="btn hl-btn-primary mt-4" data-bs-toggle="modal" data-bs-target="#applyModal"
+                        data-job-id="{{ job.pk }}" data-job-title="{{ job.title }}">
+                    <i class="bi bi-send"></i> Apply Now
+                </button>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="hl-detail-side">
+                <h5 class="mb-3">About {{ job.company.name }}</h5>
+                <ul class="list-unstyled hl-job-meta mb-0">
+                    <li class="mb-2"><i class="bi bi-geo-alt"></i> {{ job.company.location }}</li>
+                    {% if job.company.website %}
+                        <li class="mb-2">
+                            <i class="bi bi-globe"></i>
+                            <a href="{{ job.company.website }}" target="_blank" rel="noopener noreferrer">{{ job.company.website }}</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include "jobs/_apply_modal.html" %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'jobs/js/application.js' %}"></script>
+{% if form_has_errors %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modal = new bootstrap.Modal(document.getElementById('applyModal'));
+        modal.show();
+    });
+</script>
+{% endif %}
+{% endblock %}

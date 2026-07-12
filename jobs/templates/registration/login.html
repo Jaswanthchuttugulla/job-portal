@@ -1,0 +1,39 @@
+{% extends "jobs/base.html" %}
+
+{% block title %}Recruiter Login &mdash; HireLine{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-5">
+            <div class="hl-detail-panel">
+                <div class="text-center mb-4">
+                    <i class="bi bi-person-badge" style="font-size: 2.4rem; color: var(--hl-amber);"></i>
+                    <h2 class="h4 mt-2 mb-0">Recruiter Login</h2>
+                    <p class="text-muted small mb-0">Access the applicant tracking dashboard</p>
+                </div>
+
+                {% if form.errors %}
+                    <div class="alert alert-danger py-2 small">
+                        Your username and password didn't match. Please try again.
+                    </div>
+                {% endif %}
+
+                <form method="post" action="{% url 'login' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="id_username" class="form-label">Username</label>
+                        <input type="text" name="username" class="form-control" id="id_username" required autofocus>
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_password" class="form-label">Password</label>
+                        <input type="password" name="password" class="form-control" id="id_password" required>
+                    </div>
+                    <input type="hidden" name="next" value="{{ next }}">
+                    <button type="submit" class="btn hl-btn-primary w-100">Log In</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

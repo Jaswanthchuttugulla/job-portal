@@ -1,0 +1,67 @@
+{% load static %}
+<div class="modal fade" id="applyModal" tabindex="-1" aria-labelledby="applyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <form method="post" action="{% if job %}{% url 'apply_to_job' job.pk %}{% endif %}" enctype="multipart/form-data" data-application-form novalidate>
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="applyModalLabel">
+                        Apply for <span class="modal-title-job">{{ job.title|default:"this role" }}</span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Full name</label>
+                            <input type="text" name="full_name" class="form-control{% if form.full_name.errors %} is-invalid{% endif %}" placeholder="Full name" required minlength="2" value="{{ form.full_name.value|default_if_none:'' }}">
+                            <div class="invalid-feedback">Please enter your full name.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control{% if form.email.errors %} is-invalid{% endif %}" placeholder="you@example.com" required value="{{ form.email.value|default_if_none:'' }}">
+                            <div class="invalid-feedback">Please enter a valid email address.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Phone</label>
+                            <input type="tel" name="phone" class="form-control{% if form.phone.errors %} is-invalid{% endif %}" placeholder="+91 98765 43210" required value="{{ form.phone.value|default_if_none:'' }}">
+                            <div class="invalid-feedback">Please enter a valid phone number.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Portfolio URL <span class="text-muted small">(optional)</span></label>
+                            <input type="url" name="portfolio_url" class="form-control{% if form.portfolio_url.errors %} is-invalid{% endif %}" placeholder="https://your-portfolio.example.com" value="{{ form.portfolio_url.value|default_if_none:'' }}">
+                            <div class="invalid-feedback">Please enter a valid URL.</div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Skills</label>
+                            <input type="text" name="skills" maxlength="500" class="form-control{% if form.skills.errors %} is-invalid{% endif %}" placeholder="e.g. Python, Django, REST APIs" required value="{{ form.skills.value|default_if_none:'' }}">
+                            <div class="invalid-feedback">Please list at least one skill.</div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Resume</label>
+                            <input type="file" name="resume" accept=".pdf,.doc,.docx" class="form-control{% if form.resume.errors %} is-invalid{% endif %}" required>
+                            <div class="form-text">PDF, DOC, or DOCX &mdash; max 5MB.</div>
+                            <div class="invalid-feedback">Please upload your resume (PDF, DOC, or DOCX, max 5MB).</div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Cover letter <span class="text-muted small">(optional)</span></label>
+                            <textarea name="cover_letter" maxlength="3000" rows="5" class="form-control{% if form.cover_letter.errors %} is-invalid{% endif %}" placeholder="Tell us why you're a great fit for this role">{{ form.cover_letter.value|default_if_none:'' }}</textarea>
+                            <div class="invalid-feedback">Please keep your cover letter under 3000 characters.</div>
+                        </div>
+                        {% if form.errors %}
+                            <div class="col-12">
+                                <div class="alert alert-danger py-2 px-3 mb-0 small">
+                                    Please correct the highlighted fields and try again.
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn hl-btn-outline" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn hl-btn-primary">Submit Application</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

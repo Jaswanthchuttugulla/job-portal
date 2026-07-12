@@ -1,0 +1,32 @@
+{% extends "jobs/base.html" %}
+
+{% block title %}Application Submitted &mdash; HireLine{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="hl-detail-panel text-center">
+                <div class="mb-3">
+                    <i class="bi bi-check-circle-fill" style="font-size: 3.2rem; color: var(--hl-teal);"></i>
+                </div>
+                <h2 class="h3">Application submitted!</h2>
+                {% if job %}
+                    <p class="text-muted">
+                        Thanks for applying to <strong>{{ job.title }}</strong> at <strong>{{ job.company.name }}</strong>.
+                        The recruiting team will review your application and update your status soon.
+                    </p>
+                {% else %}
+                    <p class="text-muted">Your application has been received. The recruiting team will review it soon.</p>
+                {% endif %}
+                <div class="d-flex justify-content-center gap-2 mt-4">
+                    <a href="{% url 'job_list' %}" class="btn hl-btn-primary"><i class="bi bi-briefcase"></i> Browse More Jobs</a>
+                    {% if job %}
+                        <a href="{% url 'job_detail' job.pk %}" class="btn hl-btn-outline">View Job Again</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

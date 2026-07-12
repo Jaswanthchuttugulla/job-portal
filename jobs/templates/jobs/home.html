@@ -1,0 +1,172 @@
+{% extends "jobs/base.html" %}
+{% load static %}
+
+{% block title %}Browse Jobs &mdash; HireLine{% endblock %}
+
+{% block content %}
+
+<section class="hl-hero">
+    <div class="container position-relative">
+        <span class="hl-section-eyebrow">Job Board &amp; Applicant Tracking</span>
+        <h1 class="mt-2">Find your next role. Track every application in one place.</h1>
+        <p class="lead mb-3">Browse open positions from real companies, apply in minutes, and let recruiters move your application through a transparent hiring pipeline.</p>
+        <div class="d-flex flex-wrap gap-2">
+            <span class="hl-stat-pill"><i class="bi bi-briefcase-fill"></i> {{ total_active_jobs }} active openings</span>
+            <span class="hl-stat-pill"><i class="bi bi-shield-check"></i> No sign-up required to apply</span>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <div class="hl-search-card" id="search">
+        <form method="get" action="{% url 'job_list' %}" class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label small text-uppercase fw-semibold">Keyword</label>
+                <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Job title, company, keyword&hellip;">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small text-uppercase fw-semibold">Skill</label>
+                <input type="text" name="skill" value="{{ skill }}" class="form-control" placeholder="e.g. Django">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small text-uppercase fw-semibold">Location</label>
+                <input type="text" name="location" value="{{ location }}" class="form-control" placeholder="City">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small text-uppercase fw-semibold">Type</label>
+                <select name="job_type" class="form-select">
+                    <option value="">All types</option>
+                    {% for value, label in job_type_choices %}
+                        <option value="{{ value }}" {% if job_type == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-1 d-grid">
+                <button type="submit" class="btn hl-btn-primary"><i class="bi bi-search"></i></button>
+            </div>
+        </form>
+
+        <div class="mt-3">
+            <label class="form-label small text-uppercase fw-semibold text-muted">
+                <i class="bi bi-lightning-charge"></i> Live filter (no reload &mdash; searches cards already on this page)
+            </label>
+            <input type="text" id="liveFilterInput" class="form-control" placeholder="Type to instantly filter jobs shown below&hellip;">
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+        <h4 class="mb-0">{{ page_obj.paginator.count|default:jobs.count }} job{{ page_obj.paginator.count|pluralize }} found</h4>
+        {% if query or skill or location or job_type %}
+            <a href="{% url 'job_list' %}" class="small text-decoration-underline text-muted">Clear filters</a>
+        {% endif %}
+    </div>
+
+    {% if jobs %}
+        <div class="row g-4 pb-4">
+            {% for job in jobs %}
+                <div class="col-md-6 col-lg-4 hl-job-col" data-job-card>
+                    <div class="hl-job-card"
+                         style="--hl-job-color: var(--hl-{{ job.job_type|lower }});"
+                         data-title="{{ job.title }}"
+                         data-company="{{ job.company.name }}"
+                         data-location="{{ job.location }}"
+                         data-skills="{{ job.required_skills }}">
+                        <div class="d-flex align-items-start gap-3 mb-2">
+                            {% if job.company.logo_url %}
+                                <img src="{{ job.company.logo_url }}" alt="{{ job.company.name }} logo" class="hl-job-logo">
+                            {% else %}
+                                <div class="hl-job-logo-fallback">{{ job.company.name|slice:":1" }}</div>
+                            {% endif %}
+                            <div class="flex-grow-1">
+                                <h3 class="hl-job-title">{{ job.title }}</h3>
+                                <div class="hl-job-meta">{{ job.company.name }}</div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2 mb-2">
+                            <span class="hl-badge-type hl-badge-{{ job.job_type }}">{{ job.get_job_type_display }}</span>
+                            {% if job.job_type == "REMOTE" %}
+                                <span class="hl-remote-badge"><i class="bi bi-house-door"></i> Remote</span>
+                            {% else %}
+                                <span class="hl-onsite-badge"><i class="bi bi-geo-alt"></i> On-site</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="hl-job-meta mb-2">
+                            <i class="bi bi-geo-alt"></i> {{ job.location }}
+                            {% if job.salary_range %} &middot; <i class="bi bi-cash-stack"></i> {{ job.salary_range }}{% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            {% for skill_item in job.skills_list|slice:":4" %}
+                                <span class="hl-skill-chip">{{ skill_item }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="hl-job-meta mb-3">
+                            <i class="bi bi-calendar-event"></i> Apply by {{ job.application_deadline|date:"M j, Y" }}
+                        </div>
+
+                        <div class="mt-auto d-flex gap-2">
+                            <a href="{% url 'job_detail' job.pk %}" class="btn hl-btn-outline btn-sm flex-grow-1">View Details</a>
+                            <button type="button" class="btn hl-btn-primary btn-sm flex-grow-1"
+                                    data-bs-toggle="modal" data-bs-target="#applyModal"
+                                    data-job-id="{{ job.pk }}" data-job-title="{{ job.title }}">
+                                Apply Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div id="liveFilterEmptyState" class="hl-empty-state d-none">
+            <i class="bi bi-search"></i>
+            <p class="mt-2 mb-0">No jobs on this page match your live filter.</p>
+        </div>
+
+        {% if is_paginated %}
+            <nav class="mb-5" aria-label="Job listing pagination">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item"><a class="page-link" href="?{% if query %}q={{ query }}&{% endif %}{% if skill %}skill={{ skill }}&{% endif %}{% if location %}location={{ location }}&{% endif %}{% if job_type %}job_type={{ job_type }}&{% endif %}page={{ page_obj.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+                    <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+                    {% if page_obj.has_next %}
+                        <li class="page-item"><a class="page-link" href="?{% if query %}q={{ query }}&{% endif %}{% if skill %}skill={{ skill }}&{% endif %}{% if location %}location={{ location }}&{% endif %}{% if job_type %}job_type={{ job_type }}&{% endif %}page={{ page_obj.next_page_number }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="hl-empty-state mb-5">
+            <i class="bi bi-inboxes"></i>
+            <h5 class="mt-3">No jobs match your search</h5>
+            <p class="mb-0">Try clearing a filter or searching a different keyword.</p>
+        </div>
+    {% endif %}
+</div>
+
+{% include "jobs/_apply_modal.html" %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'jobs/js/job_search.js' %}"></script>
+<script src="{% static 'jobs/js/application.js' %}"></script>
+<script>
+    // Route the shared "Apply Now" modal to the correct job when opened from a card.
+    const applyModal = document.getElementById('applyModal');
+    if (applyModal) {
+        applyModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            if (!button) return;
+            const jobId = button.getAttribute('data-job-id');
+            const jobTitle = button.getAttribute('data-job-title');
+            const form = applyModal.querySelector('form');
+            form.action = `/jobs/${jobId}/apply/`;
+            applyModal.querySelector('.modal-title-job').textContent = jobTitle;
+        });
+    }
+</script>
+{% endblock %}
